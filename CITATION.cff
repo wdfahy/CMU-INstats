@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+type: software
+message: "If you use this version of the software, please cite it as below."
+authors:
+  - given-names: William D.
+    family-names: Fahy
+  - given-names: Cosma Rohilla
+    family-names: Shalizi
+  - given-names: Ryan C.
+    family-names: Sullivan
+title: tbd
+version: 1.0
+doi: tbd
+date-released: TBD
