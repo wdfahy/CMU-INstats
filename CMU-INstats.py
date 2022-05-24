@@ -203,13 +203,16 @@ class Freeze(object):
             self.data.append(self.bkgd.path + os.sep + self.bkgd.name + '.csv')
             if self.bkgdSub: 
                 self.att.add('Background has been subtracted')
-        tot = pd.concat([self.freeze, pd.Series(self.freeze['nF']/self.nD, name='FF'), pd.Series(self.data, name = 'data'), pd.Series(list(self.att), name='att')],  axis='columns')
+        if not self.isDiff:
+            tot = pd.concat([self.freeze, pd.Series(self.freeze['nF']/self.nD, name='FF'), pd.Series(self.data, name = 'data'), pd.Series(list(self.att), name='att')],  axis='columns')
         if self.path == None:
             saveas = True
         if saveas:
             self.path= input('Enter the path to save to: ') + os.sep + self.name + '.csv'
 
         if self.interpStats is not None:
+            keys = []
+            
             if self.path.rfind(os.sep) == -1:
                 cutpath = self.path[:self.path.rfind('/')]
             else:
@@ -272,17 +275,83 @@ class Freeze(object):
                 spectra['K (Ice active sites per mL)'] = self.interpSpectra['K'](xs)
                 spectra['KlowerCI (Ice active sites per mL)'] = self.interpStats['lowerCI']['K'](xs)
                 spectra['KupperCI (Ice active sites per mL)'] = self.interpStats['upperCI']['K'](xs)
-                spectra['diffK (Ice active sites per mL degree Celsius)'] = self.interpSpectra['diffK'](xs)
-                spectra['diffKlowerCI (Ice active sites per mL degree Celsius)'] = self.interpStats['lowerCI']['diffK'](xs)
-                spectra['diffKupperCI (Ice active sites per mL degree Celsius)'] = self.interpStats['upperCI']['diffK'](xs)
+                spectra['k (Ice active sites per mL degree Celsius)'] = self.interpSpectra['k'](xs)
+                spectra['klowerCI (Ice active sites per mL degree Celsius)'] = self.interpStats['lowerCI']['k'](xs)
+                spectra['kupperCI (Ice active sites per mL degree Celsius)'] = self.interpStats['upperCI']['k'](xs)
                 spectra = pd.DataFrame.from_dict(spectra)
 
+            elif specType == 'all':
+                spectraa = dict()
+                spectraa['Temp (degrees Celsius)'] = xs
+                spectrab = dict()
+                spectrab['Temp (degrees Celsius)'] = xs
+                spectrac = dict()
+                spectrac['Temp (degrees Celsius)'] = xs
+                
+                keysa = ['ns (Ice active sites per square centimeter)',
+                        'nslowerCI (Ice active sites per square centimeter)',
+                        'nsupperCI (Ice active sites per square centimeter)',
+                        'diffns (Ice active sites per square centimeter degree Celsius)',
+                        'diffnslowerCI (Ice active sites per square centimeter degree Celsius)',
+                        'diffnsupperCI (Ice active sites per square centimeter degree Celsius)']
+                
+                for key in keysa:
+                    spectraa[key] = np.empty(len(xs))
+    
+                spectraa['ns (Ice active sites per square centimeter)'] = self.interpSpectra['ns'](xs)
+                spectraa['nslowerCI (Ice active sites per square centimeter)'] = self.interpStats['lowerCI']['ns'](xs)
+                spectraa['nsupperCI (Ice active sites per square centimeter)'] = self.interpStats['upperCI']['ns'](xs)
+                spectraa['diffns (Ice active sites per square centimeter degree Celsius)'] = self.interpSpectra['diffns'](xs)
+                spectraa['diffnslowerCI (Ice active sites per square centimeter degree Celsius)'] = self.interpStats['lowerCI']['diffns'](xs)
+                spectraa['diffnsupperCI (Ice active sites per square centimeter degree Celsius)'] = self.interpStats['upperCI']['diffns'](xs)
+                spectraa = pd.DataFrame.from_dict(spectraa)
+            
+                keysb = ['nm (Ice active sites per gram)',
+                        'nmlowerCI (Ice active sites per gram)',
+                        'nmupperCI (Ice active sites per gram)',
+                        'diffnm (Ice active sites per gram degree Celsius)',
+                        'diffnmlowerCI (Ice active sites per gram degree Celsius)',
+                        'diffnmupperCI (Ice active sites per gram degree Celsius)']
+                
+                for key in keysb:
+                    spectrab[key] = np.empty(len(xs))
+    
+                spectrab['nm (Ice active sites per gram)'] = self.interpSpectra['nm'](xs)
+                spectrab['nmlowerCI (Ice active sites per gram)'] = self.interpStats['lowerCI']['nm'](xs)
+                spectrab['nmupperCI (Ice active sites per gram)'] = self.interpStats['upperCI']['nm'](xs)
+                spectrab['diffnm (Ice active sites per gram degree Celsius)'] = self.interpSpectra['diffnm'](xs)
+                spectrab['diffnmlowerCI (Ice active sites per gram degree Celsius)'] = self.interpStats['lowerCI']['diffnm'](xs)
+                spectrab['diffnmupperCI (Ice active sites per gram degree Celsius)'] = self.interpStats['upperCI']['diffnm'](xs)
+                spectrab = pd.DataFrame.from_dict(spectrab)
+                
+                keysc = ['K (Ice active sites per mL)',
+                        'KlowerCI (Ice active sites per mL)',
+                        'KupperCI (Ice active sites per mL)',
+                        'k (Ice active sites per mL degree Celsius)',
+                        'klowerCI (Ice active sites per mL degree Celsius)',
+                        'kupperCI (Ice active sites per mL degree Celsius)']
+                for key in keysc:
+                    spectrac[key] = np.empty(len(xs))
+    
+                spectrac['K (Ice active sites per mL)'] = self.interpSpectra['K'](xs)
+                spectrac['KlowerCI (Ice active sites per mL)'] = self.interpStats['lowerCI']['K'](xs)
+                spectrac['KupperCI (Ice active sites per mL)'] = self.interpStats['upperCI']['K'](xs)
+                spectrac['k (Ice active sites per mL degree Celsius)'] = self.interpSpectra['k'](xs)
+                spectrac['klowerCI (Ice active sites per mL degree Celsius)'] = self.interpStats['lowerCI']['k'](xs)
+                spectrac['kupperCI (Ice active sites per mL degree Celsius)'] = self.interpStats['upperCI']['k'](xs)
+                spectrac = pd.DataFrame.from_dict(spectrac)
 
-            spectra.to_csv(r'%s%sspectra%s%s.csv' %(cutpath, os.sep, os.sep, self.name), index=False)
+            if specType != 'all':
+                spectra.to_csv(r'%s%sspectra%s%s%s.csv' %(cutpath, os.sep, os.sep, self.name, specType), index=False)
+            else:
+                spectraa.to_csv(r'%s%sspectra%s%s%s.csv' %(cutpath, os.sep, os.sep, self.name, 'ns'), index=False)
+                spectrab.to_csv(r'%s%sspectra%s%s%s.csv' %(cutpath, os.sep, os.sep, self.name, 'nm'), index=False)
+                spectrac.to_csv(r'%s%sspectra%s%s%s.csv' %(cutpath, os.sep, os.sep, self.name, 'K'), index=False)
+
             if feedback: print("Saved spectra of Freeze %s to '%s\spectra\%s.csv'" %(self.name, cutpath, self.name))
-
-        tot.to_csv(r'%s' %(self.path), index=False)
-        if feedback: print("Saved Freeze %s to '%s'" %(self.name, self.path))
+        if not self.isDiff:
+            tot.to_csv(r'%s' %(self.path), index=False)
+            if feedback: print("Saved Freeze %s to '%s'" %(self.name, self.path))
 
     #Simple function to update the data variable so that saving works
     def updateData(self):
@@ -770,8 +839,8 @@ def calcCIBody(freeze, sims, alpha=0.05, interp = 'smoothedPCHIP', moreStats=Fal
     
     return interpStats
 
-def interpolateSpectra(rawspectrum, interp='smoothedPCHIP', bounds=None, isbkgd = False, modS=1):
-
+def interpolateSpectra(rawspectrum, interp='smoothedPCHIP', bounds=None, isbkgd = False, modS=1):    
+    
     if isbkgd:
         diffkeys = ['k']
         intkeys = ['K']
@@ -830,7 +899,6 @@ def interpolateSpectra(rawspectrum, interp='smoothedPCHIP', bounds=None, isbkgd 
         if not isbkgd:
             spl['diffnm'] = invspl['nm'].derivative()
             spl['diffns'] = invspl['ns'].derivative()
-        
         return spl
 
 
@@ -1420,35 +1488,18 @@ I can't promise all cases are caught.
 '''
 def bootstrapFreezeDiff(samp, ref, nSim=None, CI='tskew', diff = 'divide', interp='smoothedPCHIP', alpha = 0.05, bkgd = False, moreStats=False):
     n = ref.nD + samp.nD
-    ans = 'y'
-    if nSim != None:
-        print('recalculating bootstrap samples. Continue? (y/n)')
-        ans= input()
-        if ans == 'y':
-            if CI == 'studentized':
-                trash, ref.sims, ref.resims = ref.bootStats(nSim=nSim, studentized=True)
-                trash, samp.sims, samp.resims = samp.bootStats(nSim=nSim, studentized=True)
-            trash, ref.sims = ref.bootStats(nSim=nSim)
-            trash, samp.sims = samp.bootStats(nSim=nSim)
-    
-    if nSim == None or ans == 'n':
-        if samp.CI != ref.CI:
-            if samp.CI == 'studentized' or ref.CI == 'studentized':
-                raise('Fatal mismatched CI error')
-            else:
-                print('Warning, nonfatal mismatched CI methods \n')
-                ans = input('Enter 1 if you would like to continue')
-                if ans != 1:
-                    raise('Mismatched CI error')
-        if not type(ref.sims) is list:
-            trash, ref.sims = ref.bootStats()
-
-        if not type(samp.sims) is list:
-            trash, samp.sims = samp.bootStats()
-
-        if len(ref.sims) != len(samp.sims):
-            trash, ref.sims = ref.bootStats(nSim = len(samp.sims))
-
+    if samp.CI != ref.CI:
+        if samp.CI == 'studentized' or ref.CI == 'studentized':
+            raise(ValueError('Fatal mismatched CI error'))
+        else:
+            print('Warning, nonfatal mismatched CI methods \n')
+            ans = input('Enter 1 if you would like to continue')
+            if ans != '1':
+                raise(ValueError('Mismatched CI error'))
+    if not type(ref.sims) is list or not type(ref.sims) is list or len(ref.sims) != len(samp.sims):
+        print('Please calculate CIs before comparing spectra')
+        return [None, None, None, None]
+            
     nSim = len(samp.sims)
     sims = [None for i in range(nSim)]
 
@@ -1459,8 +1510,12 @@ def bootstrapFreezeDiff(samp, ref, nSim=None, CI='tskew', diff = 'divide', inter
         upper = min(ref.bounds[0], samp.bounds[0])
         lower = max(ref.bounds[1], samp.bounds[1])
 
-    xs = np.linspace(upper,lower, int((upper-lower)*num_xs))
-
+    try:
+        xs = np.linspace(upper, lower, int((upper-lower)*num_xs))
+    except:
+        print('These spectra do not overlap, and therefore cannot be compared.')
+        return [None, None, None, None]
+        
     simPredicts = dict()
     actualDiff = dict()
     for key in samp.sims[0].keys():
@@ -1767,7 +1822,7 @@ def calc(freeze, CI='tskew',interp='smoothedPCHIP', nSim = 1000):
     print('Interpolating and calculating CIs for %s' %freeze.name)
     freeze.calcINAS()
     freeze.interpolateSpectra(interp=interp)
-    Freeze.calcCI(freeze, nSim = nSim, CI=CI)
+    freeze.calcCI(nSim = nSim, CI=CI)
 
 
 #Returns a list of difference experiments representing each member of lst
