@@ -1460,7 +1460,7 @@ def compareFreezes(samp, ref, nSim=None, method='Empirical', CI='tskew', diff = 
         interp = ref.interpType
     actualDiff, newStats, sims, bounds = bootstrapFreezeDiff(samp, ref, nSim=nSim, CI=CI, diff=diff, interp = interp)
 
-    out = diffExp(actualDiff, newStats, sims, copy.deepcopy(samp.data), samp.name + 'Difference', copy.deepcopy(samp.att), [ref, samp], diff, bkgd = samp.bkgd)
+    out = diffExp(actualDiff, newStats, sims, copy.deepcopy(samp.data), samp.name + 'Compared to' + ref.name, copy.deepcopy(samp.att), [ref, samp], diff, bkgd = samp.bkgd)
     out.bounds = bounds
     return out
 
