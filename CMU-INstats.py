@@ -1020,7 +1020,7 @@ def initFreeze(path = None, freezes = None):
 	0.9641, -0.0732 08/21/18
 	0.9207,  0.1755 10/30/18
     0.946, -0.8406 09/20/19
-    0.9269, -1.1899
+    0.9269, -1.1899 After (most are already calibrated though)
     '''
     cal = False
     slope = 1
@@ -1043,7 +1043,7 @@ def initFreeze(path = None, freezes = None):
 
     freeze.rename(columns={'Frozen Fraction':'nF', 'Temperature':'Temp'}, inplace=True)
 
-    if cal != None:
+    if cal:
         freeze['Temp'] = freeze['Temp']*slope + intercept
 
     freeze.drop(columns=['Freezing Darkness', 'Original Darkness', 'Radius', 'Radii'], inplace=True)
@@ -1460,7 +1460,7 @@ def compareFreezes(samp, ref, nSim=None, method='Empirical', CI='tskew', diff = 
         interp = ref.interpType
     actualDiff, newStats, sims, bounds = bootstrapFreezeDiff(samp, ref, nSim=nSim, CI=CI, diff=diff, interp = interp)
 
-    out = diffExp(actualDiff, newStats, sims, copy.deepcopy(samp.data), samp.name + 'Compared to' + ref.name, copy.deepcopy(samp.att), [ref, samp], diff, bkgd = samp.bkgd)
+    out = diffExp(actualDiff, newStats, sims, copy.deepcopy(samp.data), samp.name + 'Difference', copy.deepcopy(samp.att), [ref, samp], diff, bkgd = samp.bkgd)
     out.bounds = bounds
     return out
 
